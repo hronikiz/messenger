@@ -3,10 +3,12 @@ package com.example.messenger.repository;
 import com.example.messenger.model.User;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class UserRepository {
+
     private final List<User> users = new ArrayList<>();
     private Long nextId = 1L;
 
@@ -16,7 +18,8 @@ public class UserRepository {
         return user;
     }
 
-    public List<User> findAllUsers(){
+    public List<User> findAllUsers() {
         return users;
     }
+
 }
