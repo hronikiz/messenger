@@ -9,6 +9,9 @@ public class UserDTO {
     @NotBlank(message = "Username не может быть пустым")
     private String username;
 
+    @NotBlank(message = "Nickname не может быть пустым")
+    private String nickname;
+
     @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Email должен быть корректным")
     private String email;
@@ -19,8 +22,9 @@ public class UserDTO {
 
     public UserDTO() {}
 
-    public UserDTO(String username, String email, String password) {
+    public UserDTO(String username, String nickname, String email, String password) {
         this.username = username;
+        this.nickname = nickname;
         this.email = email;
         this.password = password;
     }
@@ -31,6 +35,14 @@ public class UserDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getEmail() {

@@ -4,12 +4,14 @@ public class User {
 
     private Long id;
     private String username;
+    private String nickname;
     private String email;
     private String password;
 
-    public User(Long id, String username, String email, String password) {
+    public User(Long id, String username, String nickname, String email, String password) {
         this.id = id;
         this.username = username;
+        this.nickname = nickname;
         this.email = email;
         this.password = password;
     }
@@ -30,6 +32,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getEmail() {

@@ -26,6 +26,7 @@ public class UserController {
         User user = new User(
                 null,
                 userDTO.getUsername(),
+                userDTO.getNickname(),
                 userDTO.getEmail(),
                 userDTO.getPassword()
         );

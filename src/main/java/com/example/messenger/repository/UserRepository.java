@@ -13,6 +13,14 @@ public class UserRepository {
     private Long nextId = 1L;
 
     public User save(User user) {
+        for (User u : users) {
+            if (u.getEmail().equals(user.getEmail())){
+                throw new RuntimeException("Email уже используется");
+            }
+            if (u.getNickname().equals(user.getNickname())){
+                throw new RuntimeException("Nickname уже используется");
+            }
+        }
         user.setId(nextId++);
         users.add(user);
         return user;
