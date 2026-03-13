@@ -1,5 +1,6 @@
 package com.example.messenger.controller;
 
+import com.example.messenger.dto.UserCreateDTO;
 import com.example.messenger.dto.UserDTO;
 import com.example.messenger.model.User;
 import com.example.messenger.repository.UserRepository;
@@ -19,24 +20,31 @@ public class UserController {
     public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
     @PostMapping("/create")
-    public User createUser(@Valid @RequestBody UserDTO userDTO) {
+    public UserDTO createUser(@Valid @RequestBody UserCreateDTO dto) {
 
-        User user = new User(
-                null,
-                userDTO.getUsername(),
-                userDTO.getNickname(),
-                userDTO.getEmail(),
-                userDTO.getPassword()
-        );
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("Email уже используется");
+        }
+        if (userRepository.findByNickname(dto.getNickname()).isPresent()) {
+            throw new RuntimeException("Nickname уже используется");
+        }
 
-        return userRepository.save(user);
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setNickname(dto.getNickname());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword()); 
+
+        User saved = userRepository.save(user);
+
+        return new UserDTO(saved.getId(), saved.getUsername(), saved.getNickname(), saved.getEmail());
     }
 
     @GetMapping("/all")
-    public List<User> getAllUsers() {
-        return userRepository.findAllUsers();
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(u -> new UserDTO(u.getId(), u.getUsername(), u.getNickname(), u.getEmail()))
+                .toList();
     }
-
 }

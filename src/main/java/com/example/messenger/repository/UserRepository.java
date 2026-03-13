@@ -1,33 +1,16 @@
 package com.example.messenger.repository;
 
 import com.example.messenger.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
-public class UserRepository {
+public interface UserRepository extends JpaRepository<User, Long> {
 
-    private final List<User> users = new ArrayList<>();
-    private Long nextId = 1L;
+    Optional<User> findByEmail(String email);
 
-    public User save(User user) {
-        for (User u : users) {
-            if (u.getEmail().equals(user.getEmail())){
-                throw new RuntimeException("Email уже используется");
-            }
-            if (u.getNickname().equals(user.getNickname())){
-                throw new RuntimeException("Nickname уже используется");
-            }
-        }
-        user.setId(nextId++);
-        users.add(user);
-        return user;
-    }
-
-    public List<User> findAllUsers() {
-        return users;
-    }
+    Optional<User> findByNickname(String nickname);
 
 }

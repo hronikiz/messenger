@@ -1,12 +1,27 @@
 package com.example.messenger.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "nickname"),
+        @UniqueConstraint(columnNames = "email")
+})
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String username;
+
     private String nickname;
+
     private String email;
+
     private String password;
+
+    public User() {}
 
     public User(Long id, String username, String nickname, String email, String password) {
         this.id = id;
@@ -15,8 +30,6 @@ public class User {
         this.email = email;
         this.password = password;
     }
-
-    public User() {}
 
     public Long getId() {
         return id;
