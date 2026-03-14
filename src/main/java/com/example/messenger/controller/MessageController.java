@@ -4,6 +4,8 @@ import com.example.messenger.dto.MessageDTO;
 import com.example.messenger.model.Message;
 import com.example.messenger.repository.MessageRepository;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,22 +21,19 @@ public class MessageController {
     }
 
     @PostMapping("/send")
-    public Message sendMessage(@RequestBody MessageDTO dto) {
+    public Message sendMessage(@Valid @RequestBody MessageDTO dto) {
 
-        Message message = new Message(
-                dto.getSenderId(),
-                dto.getReceiverId(),
-                dto.getText()
-        );
+        Message message = new Message();
+        message.setChatId(dto.getChatId());
+        message.setSenderId(dto.getSenderId());
+        message.setText(dto.getText());
 
         return messageRepository.save(message);
     }
 
-    @GetMapping("/chat")
-    public List<Message> getChat(
-            @RequestParam Long senderId,
-            @RequestParam Long receiverId) {
+    @GetMapping("/chat/{chatId}")
+    public List<Message> getChatMessages(@PathVariable Long chatId) {
 
-        return messageRepository.findBySenderIdAndReceiverId(senderId, receiverId);
+        return messageRepository.findByChatIdOrderByTimestampAsc(chatId);
     }
 }

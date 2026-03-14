@@ -1,35 +1,39 @@
 package com.example.messenger.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class MessageDTO {
 
+    @NotNull
+    private Long chatId;
+
+    @NotNull
     private Long senderId;
-    private Long receiverId;
 
     @NotBlank
     private String text;
 
     public MessageDTO() {}
 
-    public Long getSenderId() {
-        return senderId;
+    public Long getChatId() {
+        return chatId;
     }
 
-    public Long getReceiverId() {
-        return receiverId;
+    public Long getSenderId() {
+        return senderId;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
     }
 
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
     }
 
     public void setText(String text) {
