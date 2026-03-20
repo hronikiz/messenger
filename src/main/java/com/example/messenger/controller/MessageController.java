@@ -1,11 +1,8 @@
 package com.example.messenger.controller;
 
 import com.example.messenger.dto.MessageDTO;
-import com.example.messenger.model.Message;
-import com.example.messenger.repository.MessageRepository;
-
-import jakarta.validation.Valid;
-
+import com.example.messenger.entity.Message;
+import com.example.messenger.service.MessageService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,26 +11,23 @@ import java.util.List;
 @RequestMapping("/messages")
 public class MessageController {
 
-    private final MessageRepository messageRepository;
+    private final MessageService messageService;
 
-    public MessageController(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
+    public MessageController(MessageService messageService) {
+        this.messageService = messageService;
     }
 
-    @PostMapping("/send")
-    public Message sendMessage(@Valid @RequestBody MessageDTO dto) {
+    @PostMapping("/{chatId}/send")
+    public Message sendMessage(
+            @PathVariable Long chatId,
+            @RequestBody MessageDTO dto
+    ) {
 
-        Message message = new Message();
-        message.setChatId(dto.getChatId());
-        message.setSenderId(dto.getSenderId());
-        message.setText(dto.getText());
-
-        return messageRepository.save(message);
+        return messageService.sendMessage(chatId, dto.getSenderId(), dto.getText());
     }
 
-    @GetMapping("/chat/{chatId}")
-    public List<Message> getChatMessages(@PathVariable Long chatId) {
-
-        return messageRepository.findByChatIdOrderByTimestampAsc(chatId);
+    @GetMapping("/{chatId}")
+    public List<Message> getMessages(@PathVariable Long chatId) {
+        return messageService.getMessages(chatId);
     }
 }

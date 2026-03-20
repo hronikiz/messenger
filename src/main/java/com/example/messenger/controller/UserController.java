@@ -2,7 +2,7 @@ package com.example.messenger.controller;
 
 import com.example.messenger.dto.UserCreateDTO;
 import com.example.messenger.dto.UserDTO;
-import com.example.messenger.model.User;
+import com.example.messenger.entity.User;
 import com.example.messenger.repository.UserRepository;
 
 import jakarta.validation.Valid;
