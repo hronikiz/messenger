@@ -1,50 +1,37 @@
 package com.example.messenger.controller;
 
-import com.example.messenger.dto.UserCreateDTO;
 import com.example.messenger.dto.UserDTO;
-import com.example.messenger.model.User;
-import com.example.messenger.repository.UserRepository;
-
-import jakarta.validation.Valid;
-
+import com.example.messenger.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-    @PostMapping("/create")
-    public UserDTO createUser(@Valid @RequestBody UserCreateDTO dto) {
-
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("Email уже используется");
-        }
-        if (userRepository.findByNickname(dto.getNickname()).isPresent()) {
-            throw new RuntimeException("Nickname уже используется");
-        }
-
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setNickname(dto.getNickname());
-        user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword()); 
-
-        User saved = userRepository.save(user);
-
-        return new UserDTO(saved.getId(), saved.getUsername(), saved.getNickname(), saved.getEmail());
+    // Получить свой профиль
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getCurrentUser(userDetails.getUsername()));
     }
 
-    @GetMapping("/all")
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(u -> new UserDTO(u.getId(), u.getUsername(), u.getNickname(), u.getEmail()))
-                .toList();
+    // Получить пользователя по ID
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    // Поиск пользователей по nickname (как в Telegram: @username)
+    @GetMapping("/search")
+    public ResponseEntity<List<UserDTO>> search(@RequestParam String nickname) {
+        return ResponseEntity.ok(userService.searchByNickname(nickname));
     }
 }
