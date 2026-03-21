@@ -1,33 +1,62 @@
 package com.example.messenger.controller;
 
-import com.example.messenger.dto.MessageDTO;
-import com.example.messenger.entity.Message;
+import com.example.messenger.dto.MessageResponse;
+import com.example.messenger.dto.SendMessageRequest;
 import com.example.messenger.service.MessageService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.security.Principal;
 
 @RestController
-@RequestMapping("/messages")
+@RequiredArgsConstructor
 public class MessageController {
 
     private final MessageService messageService;
 
-    public MessageController(MessageService messageService) {
-        this.messageService = messageService;
-    }
+    // ─── REST: История сообщений (с пагинацией) ───────────────────────
 
-    @PostMapping("/{chatId}/send")
-    public Message sendMessage(
+    @GetMapping("/api/chats/{chatId}/messages")
+    public ResponseEntity<Page<MessageResponse>> getMessages(
             @PathVariable Long chatId,
-            @RequestBody MessageDTO dto
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
 
-        return messageService.sendMessage(chatId, dto.getSenderId(), dto.getText());
+        return ResponseEntity.ok(
+            messageService.getMessages(chatId, userDetails.getUsername(), page, size)
+        );
     }
 
-    @GetMapping("/{chatId}")
-    public List<Message> getMessages(@PathVariable Long chatId) {
-        return messageService.getMessages(chatId);
+    // Отметить сообщения прочитанными (REST)
+    @PutMapping("/api/chats/{chatId}/messages/read")
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable Long chatId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        messageService.markAsRead(chatId, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
+    }
+
+    // ─── WebSocket: Отправка сообщений real-time ──────────────────────
+    // Клиент отправляет на: /app/chat.{chatId}
+    // Все в чате получают на: /topic/chat.{chatId}
+
+    @MessageMapping("/chat.{chatId}")
+    public void sendMessage(
+            @DestinationVariable Long chatId,
+            @Payload @Valid SendMessageRequest request,
+            Principal principal) {
+
+        messageService.sendMessage(chatId, principal.getName(), request);
+        // SimpMessagingTemplate.convertAndSend вызывается внутри MessageService
     }
 }

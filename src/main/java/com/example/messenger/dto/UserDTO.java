@@ -1,3 +1,12 @@
 package com.example.messenger.dto;
 
-public record UserDTO(Long id, String username, String nickname, String email) {}
+import java.time.LocalDateTime;
+
+public record UserDTO(
+    Long id,
+    String username,
+    String nickname,
+    String email,
+    boolean online,
+    LocalDateTime lastSeen
+) {}

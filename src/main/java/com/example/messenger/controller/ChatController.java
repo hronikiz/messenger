@@ -1,48 +1,75 @@
 package com.example.messenger.controller;
 
-import com.example.messenger.dto.ChatDTO;
-import com.example.messenger.dto.MessageDTO;
-import com.example.messenger.entity.Chat;
-import com.example.messenger.entity.Message;
+import com.example.messenger.dto.*;
 import com.example.messenger.service.ChatService;
-import com.example.messenger.service.MessageService;
+import com.example.messenger.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/chats")
+@RequestMapping("/api/chats")
+@RequiredArgsConstructor
 public class ChatController {
 
     private final ChatService chatService;
-    private final MessageService messageService;
+    private final UserService userService;
 
-    public ChatController(ChatService chatService, MessageService messageService) {
-        this.chatService = chatService;
-        this.messageService = messageService;
+    // Создать личный чат
+    @PostMapping("/private")
+    public ResponseEntity<ChatResponse> createPrivateChat(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CreatePrivateChatRequest request) {
+
+        Long currentUserId = userService.getEntityByEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(chatService.createPrivateChat(currentUserId, request));
     }
 
-    // Создать чат
-    @PostMapping("/create")
-    public Chat createChat(@RequestBody ChatDTO dto) {
-        return chatService.createChat(dto.getUserIds(), dto.getName());
+    // Создать групповой чат
+    @PostMapping("/group")
+    public ResponseEntity<ChatResponse> createGroupChat(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CreateGroupChatRequest request) {
+
+        Long currentUserId = userService.getEntityByEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(chatService.createGroupChat(currentUserId, request));
     }
 
-    // Получить все чаты пользователя
-    @GetMapping("/user/{userId}")
-    public List<Chat> getUserChats(@PathVariable Long userId) {
-        return chatService.getUserChats(userId);
+    // Получить все свои чаты
+    @GetMapping
+    public ResponseEntity<List<ChatResponse>> getMyChats(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long currentUserId = userService.getEntityByEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.ok(chatService.getUserChats(currentUserId));
     }
 
-    // Отправить сообщение в чат
-    @PostMapping("/{chatId}/send")
-    public Message sendMessage(@PathVariable Long chatId, @RequestBody MessageDTO dto) {
-        return messageService.sendMessage(chatId, dto.getSenderId(), dto.getText());
+    // Получить один чат
+    @GetMapping("/{chatId}")
+    public ResponseEntity<ChatResponse> getChat(
+            @PathVariable Long chatId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long currentUserId = userService.getEntityByEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.ok(chatService.getChat(chatId, currentUserId));
     }
 
-    // Получить все сообщения чата
-    @GetMapping("/{chatId}/messages")
-    public List<Message> getMessages(@PathVariable Long chatId) {
-        return messageService.getMessages(chatId);
+    // Добавить участника в групповой чат
+    @PostMapping("/{chatId}/participants/{userId}")
+    public ResponseEntity<ChatResponse> addParticipant(
+            @PathVariable Long chatId,
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long currentUserId = userService.getEntityByEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.ok(chatService.addParticipant(chatId, currentUserId, userId));
     }
 }

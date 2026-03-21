@@ -1,41 +1,45 @@
 package com.example.messenger.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "messages")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Message {
+
+    public enum MessageType {
+        TEXT, IMAGE, FILE, SYSTEM
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "chat_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
+    @Column(nullable = false)
+    private boolean isRead = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType type = MessageType.TEXT;
+
+    @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Chat getChat() { return chat; }
-    public void setChat(Chat chat) { this.chat = chat; }
-
-    public User getSender() { return sender; }
-    public void setSender(User sender) { this.sender = sender; }
-
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
