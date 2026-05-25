@@ -27,11 +27,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Префикс для топиков, на которые подписываются клиенты
         registry.enableSimpleBroker("/topic", "/queue");
-        // Префикс для сообщений, которые отправляет клиент
         registry.setApplicationDestinationPrefixes("/app");
-        // Префикс для личных сообщений конкретному пользователю
         registry.setUserDestinationPrefix("/user");
     }
 
@@ -42,7 +39,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
-    // JWT-аутентификация при WebSocket CONNECT
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
